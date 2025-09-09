@@ -1,0 +1,71 @@
+---
+title: "2018-01"
+format: html
+---
+
+## Getting the data
+
+2018-04-02
+
+Average tuition and educational attainment in the USA.
+
+Average in-state tuition and fees for one year of full-time study at 
+public four-year institutions 
+
+```{r}
+library(tidytuesdayR)
+library(tidyverse)
+
+tuesdata <- tt_load(2018, week = 1) 
+tuesdata |> names()
+tuesdata <- tuesdata$us_avg_tuition
+```
+
+## Exploring the data
+
+
+```{r}
+head(tuesdata)
+```
+
+13 variables - State and years, in a not very tidy format - `2004-05` indicates
+that the tuition is for the academic year 2004-2005.
+
+```{r}
+summary(tuesdata)
+```
+
+## Tidying up
+Lad os antage at det akademiske år starter 1. september.
+
+```{r}
+tidy_tuesdata <- tuesdata |> 
+    pivot_longer(cols = where(is.numeric), 
+                 names_to = "year", 
+                 values_to = "tuition") |> 
+    mutate(year = str_extract(year, "\\d{4}"),
+           year = str_c(year, "-09-01"),
+           year = as_date(year))
+
+
+```
+
+First visualisation
+
+```{r}
+tidy_tuesdata |> 
+    ggplot(aes(x = year, y = tuition, color = State)) +
+        geom_line()
+```
+
+Spaghetti. And too many states
+
+Hvilken er den mest gennemsnitlige stat?
+
+Og vi skal have lavet et kort
+
+```{r}
+tidy_tuesdata |> 
+    group_by() |> 
+    summarise(rank = rank(tuition))
+```
