@@ -64,8 +64,10 @@ Hvilken er den mest gennemsnitlige stat?
 
 Og vi skal have lavet et kort
 
+Rang for hver stat for hvert år
 ```{r}
 tidy_tuesdata |> 
-    group_by() |> 
-    summarise(rank = rank(tuition))
+    group_by(year) |> mutate(rang = rank(tuition)) |> 
+    ungroup() |> 
+    filter(year(year) == 2004) 
 ```
