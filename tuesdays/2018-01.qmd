@@ -67,7 +67,38 @@ Og vi skal have lavet et kort
 Rang for hver stat for hvert år
 ```{r}
 tidy_tuesdata |> 
-    group_by(year) |> mutate(rang = rank(tuition)) |> 
+    group_by(year) |> 
+    mutate(rang = rank(tuition, ties.method = "first")) |> 
+    mutate(State = factor(State, levels = rang)) |> 
     ungroup() |> 
     filter(year(year) == 2004) 
 ```
+
+
+Animeret ranked barchart
+
+Choropleth
+
+
+```{r}
+library(gganimate)
+
+p2 <- tidy_tuesdata |> 
+    group_by(year) |> 
+    mutate(rang = rank(tuition, ties.method = "first")) |> 
+    ungroup() |> 
+
+    ggplot(aes(xmin = 0, xmax = tuition, y = rang, ymin = rang -0.4, ymax = rang +0.4, fill = State)) +
+    geom_rect() +
+    geom_text(aes(x=0, label= State), hjust = "right")  +
+    facet_wrap(~year) +
+    facet_null() +
+    transition_time(year) +
+    theme_void() +
+    theme(legend.position = "none")
+p2
+
+```
+
+det er lidt uoverskueligt. Måske udvælge de to der falder og stiger mest - og nøjes med at 
+have farver på dem?
