@@ -102,3 +102,13 @@ p2
 
 det er lidt uoverskueligt. Måske udvælge de to der falder og stiger mest - og nøjes med at 
 have farver på dem?
+
+
+```{r}
+tidy_tuesdata |> 
+    group_by(year) |> 
+    mutate(rang = rank(tuition, ties.method = "first")) |> 
+    ungroup() |> 
+    filter(year(year) %in% c(2004, 2015)) |> 
+    pivot_wider(names_from = year, values_from = rang)
+```
