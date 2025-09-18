@@ -103,7 +103,7 @@ have farver på dem?
 
 
 ```{r}
-tidy_tuesdata |> 
+most_change <- tidy_tuesdata |> 
     group_by(year) |> 
     mutate(rang = rank(tuition, ties.method = "first")) |> 
     filter(year(year) %in% c(2004, 2015)) |> 
@@ -112,6 +112,60 @@ tidy_tuesdata |>
     arrange(year) |> 
     summarise(rang_change = last(rang) - first(rang)) |> 
     ungroup() |> 
-    arrange(desc(abs(rang_change)))
+    arrange(desc(abs(rang_change))) |> 
+    group_by(sign(rang_change)) |> 
+    slice(1) |> 
+    ungroup() |> 
+    rename(color = `sign(rang_change)`) |> 
+    select(-rang_change)
+
     
+```
+
+
+```{r}
+library(gganimate)
+
+p3 <- tidy_tuesdata |> 
+    group_by(year) |> 
+    mutate(rang = rank(tuition, ties.method = "first")) |> 
+    ungroup() |> 
+    left_join(most_change) |>
+    
+    ggplot(aes(xmin = 0, xmax = tuition, y = rang, ymin = rang -0.4, ymax = rang +0.4, fill = color)) +
+    geom_rect() +
+    geom_text(aes(x=0, label= State), hjust = "right")  +
+    facet_wrap(~year) +
+    facet_null() +
+    transition_time(year) +
+    theme_void() +
+    theme(legend.position = "none")
+p3
+
+```
+
+
+
+Hep. Men juster på farver og hastighed
+
+
+Og så en choropleth:
+
+```{r}
+library(usmap); library(ggplot2)
+
+
+
+df <- tidy_tuesdata |> filter(year(year) == 2013) |> 
+  rename(state = State)
+choro <- plot_usmap(data = df, values = "tuition", regions = "states")+
+  scale_fill_viridis_c(option = "C", name = "Værdi") +
+  theme(legend.position = "left")
+
+choro
+```
+
+
+```{r}
+class(choro)
 ```
